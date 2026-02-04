@@ -1,0 +1,14 @@
+# Visual Studio
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Build artifacts
+Debug/
+Release/
+x64/
+build/
+
+
