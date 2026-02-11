@@ -4,6 +4,17 @@
 #include <vector>
 #include <cstddef>
 
+// This assignment sparked my interest in implementing core data structures from scratch. 
+// I initially tried a vector-based set, but insert/erase become O(n).
+// This motivated me to implement a BST-based set from scratch as a learning exercise.
+
+
+// This implementation uses an unbalanced BST.
+// Average complexity is O(log n), but the worst case can degrade to O(n).
+// A natural next step would be implementing a self-balancing tree
+// (AVL or Red-Black) to guarantee O(log n) worst-case performance.
+
+
 class MySet {
 private:
     struct Node {
@@ -11,20 +22,20 @@ private:
         std::unique_ptr<Node> left;
         std::unique_ptr<Node> right;
 
-        explicit Node(std::string k) : key(std::move(k)) {}   //random implicit transformations
+        explicit Node(std::string k) : key(std::move(k)) {}  
     };
 
     std::unique_ptr<Node> root_;
     std::size_t size_ = 0;
 
    
-    static bool contains_impl(const Node* node, const std::string& key) {
+    static bool contains_impl(const Node* node, const std::string& key) 
         while (node) {
             if (key < node->key) node = node->left.get();
             else if (key > node->key) node = node->right.get();
             else return true; 
         }
-        return false; //= равно
+        return false; 
     }
 
     static bool insert_impl(std::unique_ptr<Node>& node, std::string key) {
@@ -40,13 +51,17 @@ private:
             return insert_impl(node->right, std::move(key));
         }
 
-        return false; // дубль
+        return false; 
     }
 
 
-    static Node* min_node(Node* node) {
-        while (node->left) node = node->left.get();
-        return node;
+    static std::string extract_min_key(std::unique_ptr<Node>& node) {
+        if (!node->left){
+            std::string k = std::move(node->key);
+            node = std::move(node->right);
+            return k;
+        }
+        return extract_min_key(node->left);
     }
 
 
@@ -66,21 +81,21 @@ private:
             return true;
         }
 
-        // нет пр
+       
         if (!node->right) {
             node = std::move(node->left);
             return true;
         }
 
-        Node* succ = min_node(node->right.get());
-        node->key = succ->key;
-        return erase_impl(node->right, succ->key);
+        node->key = extract_min_key(node->right);
+        return true;
+
     }
 
     static void inorder_impl(const Node* node, std::vector<std::string>& out) {
         if (!node) return;
         inorder_impl(node->left.get(), out);
-        out.push_back(node->key);
+        out.push_back(node->key); 
         inorder_impl(node->right.get(), out);
     }
 
@@ -111,7 +126,7 @@ public:
 
     std::vector<std::string> values_sorted() const {
         std::vector<std::string> out;
-        out.reserve(size_);
+        out.reserve(size_); 
         inorder_impl(root_.get(), out);
         return out;
     }
