@@ -2,6 +2,7 @@
 #include <cstring>
 #include <utility>
 #include <memory>
+#include <vector>
 
 struct Entity
 {
@@ -102,6 +103,14 @@ struct TextEntity : Entity
     }
 };
 
+std::vector<std::unique_ptr<Entity>> cloneAll(const std::vector<std::unique_ptr<Entity>>& v)
+{
+    std::vector<std::unique_ptr<Entity>> out;
+    out.reserve(v.size());
+    for (const auto& p : v)
+        out.push_back(p ? p->clone() : nullptr);
+    return out;
+}
 int main()
 {
     std::cout << "=== Polymorphism + clone ===\n";
@@ -143,4 +152,21 @@ int main()
     std::cout << "m(after move assign): "; m.print();
     std::cout << "n: "; n.print();
 
+    std::cout << "\n=== Polymorphic vector + deep copy ===\n";
+    std::vector<std::unique_ptr<Entity>> vec;
+    vec.push_back(std::make_unique<TextEntity>("One"));
+    vec.push_back(std::make_unique<NumberEntity>(42));
+    vec.push_back(std::make_unique<TextEntity>("Three"));
+
+    for (auto& e : vec) e->print();
+
+    auto vec2 = cloneAll(vec);
+    std::cout << "--- cloned ---\n";
+    for (auto& e : vec2) e->print();
+
+
+    static_cast<TextEntity*>(vec[0].get())->setText("CHANGED ORIGINAL");
+    std::cout << "--- after change original[0] ---\n";
+    vec[0]->print();
+    vec2[0]->print();
 }
